@@ -1,42 +1,26 @@
 workflows:
-  my-workflow:
-    name: My workflow name
-    labels:
-      - QA
-      - ${TENANT_NAME}
+  ios-build:
+    name: iOS Build Workflow
     instance_type: mac_mini_m2
     max_build_duration: 60
-    inputs:  # More info on build inputs: https://docs.codemagic.io/knowledge-codemagic/build-inputs/
-      name:
-        description: Input description
-        default: Codemagic
     environment:
-      groups:
-        - group_name
-      vars:
-        PUBLIC_ENV_VAR: "value here"
-        TENANT_NAME: "YourTenantName"  # Ensure this variable is set
       flutter: stable
-      xcode: latest
-    cache:
-      cache_paths:
-        - ~/.pub-cache
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: '*'
-          include: true
-          source: true
-      cancel_previous_builds: false
+      xcode: latest  # Ensure this matches your available Xcode version
     scripts:
-      - echo "Hello, ${{ inputs.name }}"
-      - ...
+      - name: Install dependencies
+        script: |
+          flutter pub get
+          cd ios
+          pod install
+          cd ..
+      - name: Build iOS app
+        script: |
+          flutter build ipa --release --no-codesign  # You can remove --no-codesign if you want code signing
     artifacts:
-      - build/**/outputs/bundle/**/*.aab
+      - build/ios/ipa/*.ipa  # This will save the generated IPA file
     publishing:
       email:
         recipients:
-          - m@gmail.com
+          - m@gmail.com  # Replace with your email
       scripts:
         - echo 'Post-publish script'
