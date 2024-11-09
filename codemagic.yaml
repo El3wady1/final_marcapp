@@ -6,10 +6,6 @@ workflows:
       flutter: stable
       xcode: latest
       cocoapods: default
-      variables:
-        APPLE_TEAM_ID: "elawady"          # Replace with your Apple Team ID
-        BUNDLE_ID: "com.example.finalmarcapp"     # Replace with your app's bundle ID
-        CODE_SIGN_STYLE: "automatic"
     scripts:
       - name: Install dependencies
         script: |
