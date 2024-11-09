@@ -37,6 +37,6 @@ workflows:
     publishing:
       email:
         recipients:
-          - come.example.final_marcapp
+          - m@gmail.com
       scripts:
         - echo 'Post-publish script'
