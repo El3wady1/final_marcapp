@@ -4,18 +4,18 @@ workflows:
     max_build_duration: 60
     environment:
       flutter: stable
-      xcode: 14.0.0  # Or a compatible Xcode version
+      xcode: 13.4  # Use a supported Xcode version
       cocoapods: default
     scripts:
       - name: Install dependencies
         script: |
           flutter pub get
           cd ios
-          pod repo update  # Update CocoaPods repo
-          pod install      # Install necessary pods
+          pod repo update      # Update the CocoaPods repo
+          pod install          # Install the necessary CocoaPods dependencies
           cd ..
       - name: Build iOS app
         script: |
-          flutter build ipa --release --no-codesign -v  # Add verbose flag for debugging
+          flutter build ipa --release --no-codesign -v   # Add verbose for more logs
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/ios/ipa/*.ipa  # Collect the IPA file as an artifact for download
