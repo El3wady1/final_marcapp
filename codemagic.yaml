@@ -1,45 +1,41 @@
 workflows:
-  unity-android-workflow:
-      name: Unity Android Workflow
-      instance_type: linux_x2
-      max_build_duration: 120
-      environment:
-        groups:
-          # Add the group environment variables in Codemagic UI (in Application or Team variables) - https://docs.codemagic.io/variables/environment-variable-groups/
-          - unity # <-- (Includes UNITY_HOME, UNITY_SERIAL, UNITY_EMAIL and UNITY_PASSWORD)
-          - google_play # <-- (Includes GCLOUD_SERVICE_ACCOUNT_CREDENTIALS <-- Put your google-services.json)
-        vars:
-          UNITY_VERSION: 2019.4.38f1
-          UNITY_VERSION_CHANGESET: fdbb7325fa47
-          BUILD_SCRIPT: BuildAndroid
-          PACKAGE_NAME: "io.codemagic.unity" # <-- Put your package name here e.g. com.domain.myapp
-        android_signing:
-          - unity_test
-      triggering:
-        events:
-          - push
-          - tag
-          - pull_request
-        branch_patterns:
-          - pattern: develop
-            include: true
-            source: true
+  my-workflow:
+    name: My workflow name
+    labels:
+      - QA
+      - ${TENANT_NAME}
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    inputs: # more information about build inputs:https://docs.codemagic.io/knowledge-codemagic/build-inputs/
+      name: # input ID
+        description: Input description
+        default: Codemagic
+    environment:
+      groups:
+        - group_name
+      vars:
+        PUBLIC_ENV_VAR: "value here"
+      flutter: stable
+      xcode: latest
+    cache:
+      cache_paths:
+        - ~/.pub-cache
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: '*'
+          include: true
+          source: true
+      cancel_previous_builds: false
+    scripts:
+      - echo "Hello, ${{ inputs.name }}"
+      - ...
+    artifacts:
+      - build/**/outputs/bundle/**/*.aab
+    publishing:
+      email:
+        recipients:
+          - name@example.com
       scripts:
-        - name: Activate Unity License
-          script: |  
-            $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -logFile -serial ${UNITY_SERIAL} -username ${UNITY_EMAIL} -password ${UNITY_PASSWORD}      
-        - name: Install Unity version, build support modules, ndk and jdk
-          script: |  
-            /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install --version ${UNITY_VERSION} --changeset ${UNITY_VERSION_CHANGESET}
-            /Applications/Unity\ Hub.app/Contents/MacOS/Unity\ Hub -- --headless install-modules --version ${UNITY_VERSION} -m android android-sdk-ndk-tools android-open-jdk          
-        - name: Set build number and export Unity
-          script: | 
-            export NEW_BUILD_NUMBER=$(($(google-play get-latest-build-number --package-name "$PACKAGE_NAME" --tracks=alpha) + 1))
-            $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -logFile -projectPath . -executeMethod BuildScript.$BUILD_SCRIPT -nographics -buildTarget Android      
-      artifacts:
-        - android/*.aab
-        - android/*.apk
-      publishing:
-        scripts:
-          - name: Deactivate Unity License
-            script: $UNITY_HOME/Contents/MacOS/Unity -batchmode -quit -returnlicense -nographics
+        - echo 'Post-publish script'
